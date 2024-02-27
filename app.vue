@@ -63,10 +63,10 @@
     <UModal v-model="settingsOpen">
       <div class="p-4 space-y-4">
         <UFormGroup label="Latitude" size="lg">
-          <UInput placeholder="you@example.com" />
+          <UInput v-model="latitude" placeholder="Latitude" />
         </UFormGroup>
         <UFormGroup label="Longitude" size="lg">
-          <UInput placeholder="you@example.com" />
+          <UInput v-model="longitude" placeholder="Longitude" />
         </UFormGroup>
         <UFormGroup label="Ramadan start date" size="lg">
           <UPopover :popper="{ placement: 'bottom-start' }">
@@ -98,7 +98,7 @@
             </template>
           </UPopover>
         </UFormGroup>
-        <UButton label="Save" block size="lg" />
+        <UButton label="Save" block size="lg" @click="saveSettings" />
       </div>
     </UModal>
   </main>
@@ -114,6 +114,8 @@ const settingsOpen = ref(false);
 const startDate = ref("2024-03-11");
 const endDate = ref("2024-04-09");
 const selectedDate = ref(getLocalDate());
+const latitude = ref(userLocation.value.lat);
+const longitude = ref(userLocation.value.lng);
 
 if (!userLocation.value.lat || !userLocation.value.lng) {
   if (!error.value) {
@@ -130,6 +132,12 @@ if (!userLocation.value.lat || !userLocation.value.lng) {
   }
 }
 
+function saveSettings() {
+  userLocation.value.lat = parseFloat(latitude.value);
+  userLocation.value.lng = parseFloat(longitude.value);
+  settingsOpen.value = false;
+}
+
 function getLocalDate() {
   const now = new Date();
   const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -142,7 +150,7 @@ const apiUrl = computed(() => {
   return `https://api.sunrisesunset.io/json/range?lat=${userLocation.value.lat}&lng=${userLocation.value.lng}&date_start=${startDate.value}&date_end=${endDate.value}`;
 });
 
-const { data, pending } = await useFetch(apiUrl);
+const { data, pending, refresh } = await useFetch(apiUrl);
 
 const dayIndex = computed(() => {
   return daysRange.value.findIndex((day) => day === selectedDate.value) + 1;
