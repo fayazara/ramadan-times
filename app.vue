@@ -1,33 +1,47 @@
 <template>
   <main class="fixed inset-0 flex overflow-hidden flex flex-col h-screen">
-    <header class="flex overflow-x-auto h-16 border-b">
-      <button
+    <header class="flex overflow-x-auto border-b gap-1 p-1">
+      <UButton
         v-for="(day, index) in daysRange"
         :key="day"
-        class="h-16 w-16 flex-shrink-0"
-        :class="{ 'bg-blue-500 text-white': selectedDate === day }"
+        :color="selectedDate === day ? 'black' : 'gray'"
+        class="h-16"
+        :variant="selectedDate === day ? 'solid' : 'soft'"
         @click="setCurrentDay(day)"
       >
-        <p class="text-lg">{{ index + 1 }}</p>
-        <p class="text-xs">{{ formatDate(day) }}</p>
-      </button>
+        <div>
+          <p class="text-lg">{{ index + 1 }}</p>
+          <p class="text-xs">{{ formatDate(day) }}</p>
+        </div>
+      </UButton>
     </header>
     <section class="flex-1 flex-grow">
       <div v-if="pending">
         <p>Loading...</p>
       </div>
-      <div v-else-if="!currentDayTimes">
+      <div
+        v-else-if="!currentDayTimes"
+        class="h-full flex items-center justify-center p-6 flex-col text-center gap-6"
+      >
+        <Icon name="i-solar-moon-broken" class="text-gray-500 h-6 w-6"/>
         <p>Ramadan has not started yet or no data available for this day</p>
       </div>
-      <div v-else>
-        <p class="text-xl">Selected Date: {{ formatDate(selectedDate) }}</p>
+      <div
+        v-else
+        class="h-full flex flex-col items-center justify-center text-center"
+      >
+        <p class="text-xl font-bold">Day {{ dayIndex }}</p>
+        <!-- Add this line -->
+        <p>{{ formatDate(selectedDate) }}</p>
         <div class="flex justify-around w-full mt-4">
           <div>
-            <h2 class="font-semibold">Suhoor</h2>
+            <UIcon name="i-lucide-sunrise" class="text-3xl text-gray-500" />
+            <h2 class="font-medium">Suhoor</h2>
             <p>{{ formatTime(currentDayTimes.first_light) }}</p>
           </div>
           <div>
-            <h2 class="font-semibold">Iftaar</h2>
+            <UIcon name="i-lucide-sunset" class="text-3xl text-gray-500" />
+            <h2 class="font-medium">Iftaar</h2>
             <p>{{ formatTime(currentDayTimes.sunset) }}</p>
           </div>
         </div>
@@ -43,11 +57,9 @@
 <script setup>
 import { useGeolocation, useStorage } from "@vueuse/core";
 
-// Initialize geolocation and storage for user's location
 const { coords, error } = useGeolocation();
 const userLocation = useStorage("user-location", { lat: null, lng: null });
 
-// Load or prompt for user location
 if (!userLocation.value.lat || !userLocation.value.lng) {
   if (!error.value) {
     watch(
@@ -63,21 +75,23 @@ if (!userLocation.value.lat || !userLocation.value.lng) {
   }
 }
 
+const dayIndex = computed(() => {
+  return daysRange.value.findIndex((day) => day === selectedDate.value) + 1;
+});
+
 function promptForLocation() {
-  // Implement a method to manually input location, save to `userLocation`
-  // This can be a modal or a new component where you input and save the location
+  // need to implement this
 }
 
 const startDate = ref("2024-03-11");
 const endDate = ref("2024-04-09");
 const selectedDate = ref(new Date().toISOString().split("T")[0]);
 
-// Reactive API URL based on stored location
 const apiUrl = computed(() => {
   return `https://api.sunrisesunset.io/json?lat=${userLocation.value.lat}&lng=${userLocation.value.lng}&date_start=${startDate.value}&date_end=${endDate.value}`;
 });
 
-const { data, pending, refresh } = await useFetch(apiUrl);
+const { data, pending } = await useFetch(apiUrl);
 
 const daysRange = computed(() => {
   const start = new Date(startDate.value);
