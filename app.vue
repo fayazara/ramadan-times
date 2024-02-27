@@ -7,7 +7,7 @@
         v-for="(day, index) in daysRange"
         :key="day"
         :color="selectedDate === day ? 'primary' : 'gray'"
-        class="h-16"
+        class="h-14"
         :class="{ 'active-date': selectedDate === day }"
         :variant="selectedDate === day ? 'solid' : 'ghost'"
         @click="setCurrentDay(day)"
@@ -50,7 +50,7 @@
       </div>
     </section>
     <footer
-      class="border-t dark:border-white/10 h-16 w-full flex items-center justify-between px-4"
+      class="border-t dark:border-white/10 h-14 w-full flex items-center justify-between px-4"
     >
       <UColorModeButton />
       <UButton
