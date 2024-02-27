@@ -54,20 +54,66 @@
     >
       <UColorModeButton />
       <UButton
-        @click="promptForLocation"
         variant="ghost"
         color="gray"
-        icon="i-lucide-map-pin"
+        icon="i-lucide-settings"
+        @click="settingsOpen = true"
       />
     </footer>
+    <UModal v-model="settingsOpen">
+      <div class="p-4 space-y-4">
+        <UFormGroup label="Latitude" size="lg">
+          <UInput placeholder="you@example.com" />
+        </UFormGroup>
+        <UFormGroup label="Longitude" size="lg">
+          <UInput placeholder="you@example.com" />
+        </UFormGroup>
+        <UFormGroup label="Ramadan start date" size="lg">
+          <UPopover :popper="{ placement: 'bottom-start' }">
+            <UButton
+              icon="i-heroicons-calendar-days-20-solid"
+              :label="format(startDate, 'd MMM, yyy')"
+              block
+              size="lg"
+              color="white"
+              class="justify-between"
+            />
+            <template #panel="{ close }">
+              <DatePicker v-model="startDate" @close="close" />
+            </template>
+          </UPopover>
+        </UFormGroup>
+        <UFormGroup label="Ramadan end date" size="lg">
+          <UPopover :popper="{ placement: 'bottom-start' }">
+            <UButton
+              icon="i-heroicons-calendar-days-20-solid"
+              :label="format(endDate, 'd MMM, yyy')"
+              block
+              size="lg"
+              color="white"
+              class="justify-between"
+            />
+            <template #panel="{ close }">
+              <DatePicker v-model="endDate" @close="close" />
+            </template>
+          </UPopover>
+        </UFormGroup>
+        <UButton label="Save" block size="lg" />
+      </div>
+    </UModal>
   </main>
 </template>
 
 <script setup>
 import { useGeolocation, useStorage } from "@vueuse/core";
+import { format } from "date-fns";
 
 const { coords, error } = useGeolocation();
 const userLocation = useStorage("user-location", { lat: null, lng: null });
+const settingsOpen = ref(false);
+const startDate = ref("2024-03-11");
+const endDate = ref("2024-04-09");
+const selectedDate = ref(getLocalDate());
 
 if (!userLocation.value.lat || !userLocation.value.lng) {
   if (!error.value) {
@@ -91,10 +137,6 @@ function getLocalDate() {
     .split("T")[0];
   return localDate;
 }
-
-const startDate = ref("2024-03-11");
-const endDate = ref("2024-04-09");
-const selectedDate = ref(getLocalDate());
 
 const apiUrl = computed(() => {
   return `https://api.sunrisesunset.io/json/range?lat=${userLocation.value.lat}&lng=${userLocation.value.lng}&date_start=${startDate.value}&date_end=${endDate.value}`;

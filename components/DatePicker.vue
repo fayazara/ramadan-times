@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { DatePicker as VCalendarDatePicker } from "v-calendar";
+import { format } from 'date-fns';
+
 import type {
   DatePickerDate,
   DatePickerRangeObject,
@@ -20,7 +22,19 @@ const emit = defineEmits(["update:model-value", "close"]);
 const date = computed({
   get: () => props.modelValue,
   set: (value) => {
-    emit("update:model-value", value);
+    // Check if value is a Date object and format it
+    if (value instanceof Date) {
+      const formattedDate = format(value, "yyyy-MM-dd");
+      emit("update:model-value", formattedDate);
+    } else if (value && typeof value === "object" && value.start && value.end) {
+      // Assuming value is a range object with start and end dates
+      const formattedStart = format(value.start, "yyyy-MM-dd");
+      const formattedEnd = format(value.end, "yyyy-MM-dd");
+      emit("update:model-value", { start: formattedStart, end: formattedEnd });
+    } else {
+      // Directly emit the value if it's not a Date or range object
+      emit("update:model-value", value);
+    }
     emit("close");
   },
 });
