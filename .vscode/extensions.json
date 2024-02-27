@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "formulahendry.auto-close-tag",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "Nuxtr.nuxtr-vscode",
+    "esbenp.prettier-vscode",
+    "Vue.volar"
+  ]
+}
