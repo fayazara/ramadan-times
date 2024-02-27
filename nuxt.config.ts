@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     "@nuxtjs/fontaine",
     "@vueuse/nuxt",
   ],
+  extends: ['@nuxt/ui-pro'],
   ui: {
     icons: ["lucide"],
   },

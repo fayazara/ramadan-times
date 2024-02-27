@@ -1,12 +1,14 @@
 <template>
   <main class="fixed inset-0 flex overflow-hidden flex flex-col h-screen">
-    <header class="flex overflow-x-auto border-b gap-1 p-1">
+    <header
+      class="flex overflow-x-auto border-b dark:border-white/10 gap-1 p-1"
+    >
       <UButton
         v-for="(day, index) in daysRange"
         :key="day"
-        :color="selectedDate === day ? 'black' : 'gray'"
+        :color="selectedDate === day ? 'primary' : 'gray'"
         class="h-16"
-        :variant="selectedDate === day ? 'solid' : 'soft'"
+        :variant="selectedDate === day ? 'solid' : 'ghost'"
         @click="setCurrentDay(day)"
       >
         <div>
@@ -23,16 +25,15 @@
         v-else-if="!currentDayTimes"
         class="h-full flex items-center justify-center p-6 flex-col text-center gap-6"
       >
-        <Icon name="i-solar-moon-broken" class="text-gray-500 h-6 w-6"/>
+        <Icon name="i-solar-moon-broken" class="text-gray-500 h-6 w-6" />
         <p>Ramadan has not started yet or no data available for this day</p>
       </div>
       <div
         v-else
         class="h-full flex flex-col items-center justify-center text-center"
       >
-        <p class="text-xl font-bold">Day {{ dayIndex }}</p>
-        <!-- Add this line -->
-        <p>{{ formatDate(selectedDate) }}</p>
+        <p class="text-5xl font-bold">Day {{ dayIndex }}</p>
+        <p class="mt-2">{{ formatDate(selectedDate) }}</p>
         <div class="flex justify-around w-full mt-4">
           <div>
             <UIcon name="i-lucide-sunrise" class="text-3xl text-gray-500" />
@@ -47,9 +48,16 @@
         </div>
       </div>
     </section>
-    <footer class="border-t h-16 w-full flex items-center justify-between px-4">
-      <UButton label="Set location" @click="promptForLocation" />
-      <UButton label="Set Ramadan Start and End dates" />
+    <footer
+      class="border-t dark:border-white/10 h-16 w-full flex items-center justify-between px-4"
+    >
+      <UColorModeButton />
+      <UButton
+        @click="promptForLocation"
+        variant="ghost"
+        color="gray"
+        icon="i-lucide-map-pin"
+      />
     </footer>
   </main>
 </template>

@@ -13,6 +13,7 @@
     "@formkit/auto-animate": "^0.8.1",
     "@iconify-json/lucide": "^1.1.169",
     "@nuxt/ui": "^2.14.1",
+    "@nuxt/ui-pro": "^1.0.1",
     "cal-sans": "^1.0.1",
     "date-fns": "^3.3.1",
     "nuxt": "^3.10.3",
