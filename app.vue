@@ -8,6 +8,7 @@
         :key="day"
         :color="selectedDate === day ? 'primary' : 'gray'"
         class="h-16"
+        :class="{ 'active-date': selectedDate === day }"
         :variant="selectedDate === day ? 'solid' : 'ghost'"
         @click="setCurrentDay(day)"
       >
@@ -83,23 +84,27 @@ if (!userLocation.value.lat || !userLocation.value.lng) {
   }
 }
 
-const dayIndex = computed(() => {
-  return daysRange.value.findIndex((day) => day === selectedDate.value) + 1;
-});
-
-function promptForLocation() {
-  // need to implement this
+function getLocalDate() {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split("T")[0];
+  return localDate;
 }
 
 const startDate = ref("2024-03-11");
 const endDate = ref("2024-04-09");
-const selectedDate = ref(new Date().toISOString().split("T")[0]);
+const selectedDate = ref(getLocalDate());
 
 const apiUrl = computed(() => {
-  return `https://api.sunrisesunset.io/json?lat=${userLocation.value.lat}&lng=${userLocation.value.lng}&date_start=${startDate.value}&date_end=${endDate.value}`;
+  return `https://api.sunrisesunset.io/json/range?lat=${userLocation.value.lat}&lng=${userLocation.value.lng}&date_start=${startDate.value}&date_end=${endDate.value}`;
 });
 
 const { data, pending } = await useFetch(apiUrl);
+
+const dayIndex = computed(() => {
+  return daysRange.value.findIndex((day) => day === selectedDate.value) + 1;
+});
 
 const daysRange = computed(() => {
   const start = new Date(startDate.value);
@@ -112,7 +117,7 @@ const daysRange = computed(() => {
 });
 
 const currentDayTimes = computed(() => {
-  if (!data.value) return null;
+  if (!data.value || !Array.isArray(data.value.results)) return null;
   return (
     data.value.results.find((day) => day.date === selectedDate.value) || null
   );
@@ -128,7 +133,39 @@ function formatDate(dateString) {
 }
 
 function formatTime(timeString) {
-  const [hours, minutes] = timeString.split(":");
-  return `${hours}:${minutes}`;
+  const [hours, minutes, ampm] = timeString.split(":");
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+onMounted(async () => {
+  await nextTick(() => {
+    observeActiveDate();
+  });
+});
+
+function observeActiveDate() {
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === "childList" || mutation.type === "attributes") {
+        const el = document.querySelector(".active-date");
+        if (el) {
+          el.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+          });
+          observer.disconnect();
+          break;
+        }
+      }
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class"],
+  });
 }
 </script>
